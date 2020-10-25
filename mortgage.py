@@ -80,6 +80,21 @@ class mortgage:
             self.loan_amount = self.sale_price - self.dp_dollars
         elif (self.sale_price is not None) and (self.loan_amount != (self.sale_price - self.dp_dollars)):
             raise ValueError('`loan_amount` and `sale_price` minus down payment do not match')
+
+        if self.insurance is None:
+            self.insurance = 0.0
+        if self.taxes is None:
+            self.taxes = 0.0
+        if self.add_payment is None:
+            self.add_payment = 0.0
+        if self.closing_costs is None:
+            self.closing_costs = 0.0
+        if self.name is None:
+            self.name = ''
+        if self.pmi_amount is None:
+            self.pmi_amount = 0.0
+        if self.pmi_ltv is None:
+            self.pmi_ltv = 80.0
         
         self.c_rate = self.rate/(100*12)
         self.payoff = self.payoff_months if self.payoff_months is not None else self.term
