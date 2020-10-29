@@ -247,32 +247,34 @@ sale_price = st.sidebar.number_input(
     'Sale Price [$]',
     min_value=0.0,
     max_value=10000000.0,
-    value=0.0,
+    value=300000.0,
     step=0.01
 )
 dp_select = st.sidebar.radio(
     'Down Payment Option',
     ['dollars', 'percent']
 )
-dp_dollars = st.sidebar.number_input(
-    'Down Payment [$]',
-    min_value=0.0,
-    max_value=10000000.0,
-    value=0.0,
-    step=0.01
-)
-dp_percent = st.sidebar.number_input(
-    'Down Payment [%]',
-    min_value=0.0,
-    max_value=100.0,
-    value=0.0,
-    step=0.01
-)
+if dp_select == 'dollars':
+    dp_dollars = st.sidebar.number_input(
+        'Down Payment [$]',
+        min_value=0.0,
+        max_value=10000000.0,
+        value=60000.0,
+        step=0.01
+    )
+elif dp_select == 'percent':
+    dp_percent = st.sidebar.number_input(
+        'Down Payment [%]',
+        min_value=0.0,
+        max_value=100.0,
+        value=0.0,
+        step=0.01
+    )
 loan_amount = st.sidebar.number_input(
     'Loan Amount [$]',
-    min_value=1.0,
+    min_value=0.0,
     max_value=10000000.0,
-    value=300000.0,
+    value=0.0,
     step=0.01
 )
 insurance = st.sidebar.number_input(
