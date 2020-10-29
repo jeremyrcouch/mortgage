@@ -133,6 +133,8 @@ class mortgage:
             self.balance_at_payoff = self.am_table.loc[self.am_table['month'] == self.payoff, 'balance'].values[0]
             self.payoff_reason = 'Sale'
         self.payoff_month = min(self.months_payoff_by_payment, self.payoff)
+
+        self.cash_to_close = self.dp_dollars + self.closing_costs
         
     def summary(self):
         values = [
@@ -152,6 +154,7 @@ class mortgage:
             ('Interest Paid', '${:,.0f}'.format(self.interest_paid)),
             ('Interest Saved from Added Payments', '${:,.0f}'.format(self.interest_saved)),
             ('Closing Costs', '${:,.0f}'.format(self.closing_costs)),
+            ('Cash To Close', '${:,.0f}'.format(self.cash_to_close)),
             ('Total Finance Costs', '${:,.0f}'.format(self.finance_costs))
         ]
         table = pd.DataFrame({
