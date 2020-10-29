@@ -73,7 +73,11 @@ class mortgage:
         
         if (self.dp_dollars is None) and (self.dp_percent is None):
             self.dp_dollars = 0
-        elif (self.dp_dollars is None) and (self.sale_price is not None):
+            self.dp_percent = 0.0
+        elif (self.dp_dollars is None) and (self.sale_price is not None) and (self.dp_percent is not None):
+            self.dp_dollars = self.sale_price*(self.dp_percent/100)
+        elif (self.dp_dollars is None) and (self.loan_amount is not None) and (self.dp_percent is not None):
+            self.sale_price = self.loan_amount/(1 - (self.dp_percent/100))
             self.dp_dollars = self.sale_price*(self.dp_percent/100)
             
         if (self.loan_amount is None):
