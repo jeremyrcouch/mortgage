@@ -126,7 +126,7 @@ class mortgage:
         self.payoff_reason = 'Payments'
         if self.months_payoff_by_payment > self.payoff:
             self.balance_at_payoff = self.am_table.loc[self.am_table['month'] == self.payoff, 'balance'].values[0]
-            self.payoff_reason = 'Sale'
+            self.payoff_reason = 'Sale/Paid Off'
         self.payoff_month = min(self.months_payoff_by_payment, self.payoff)
         self.cash_to_close = self.dp_dollars + self.closing_costs
         
@@ -237,16 +237,29 @@ rate = st.sidebar.number_input(
     value=3.0,
     step=0.001
 )
-sale_price = st.sidebar.number_input(
-    'Sale Price [$]',
-    min_value=0.0,
-    max_value=10000000.0,
-    value=300000.0,
-    step=0.01
+sale_amt_select = st.sidebar.radio(
+    'Sale Price or Loan Amount',
+    ['Sale Price', 'Loan Amount']
 )
+if sale_amt_select == 'Sale Price':
+    sale_price = st.sidebar.number_input(
+        'Sale Price [$]',
+        min_value=0.0,
+        max_value=10000000.0,
+        value=300000.0,
+        step=0.01
+    )
+elif sale_amt_select == 'Loan Amount':
+    loan_amount = st.sidebar.number_input(
+        'Loan Amount [$]',
+        min_value=0.0,
+        max_value=10000000.0,
+        value=0.0,
+        step=0.01
+    )
 dp_select = st.sidebar.radio(
     'Down Payment Option',
-    ['dollars', 'percent']
+    ['Dollars', 'Percent']
 )
 if dp_select == 'dollars':
     dp_dollars = st.sidebar.number_input(
@@ -264,13 +277,6 @@ elif dp_select == 'percent':
         value=0.0,
         step=0.01
     )
-loan_amount = st.sidebar.number_input(
-    'Loan Amount [$]',
-    min_value=0.0,
-    max_value=10000000.0,
-    value=0.0,
-    step=0.01
-)
 insurance = st.sidebar.number_input(
     'Insurance (annual) [$]',
     min_value=0.0,
@@ -321,12 +327,14 @@ pmi_ltv = st.sidebar.number_input(
     step=0.01
 )
 
-if sale_price < 1.0: sale_price = None
-if dp_select == 'dollars':
+if sale_amt_select == 'Sale Price':
+    loan_amount = None
+elif sale_amt_select == 'Loan Amount':
+    sale_price = None
+if dp_select == 'Dollars':
     dp_percent = None
-elif dp_select == 'percent':
+elif dp_select == 'Percent':
     dp_dollars = None
-if loan_amount < 1.0: loan_amount = None
 if payoff_months < 1: payoff_months = None
 
 mort = mortgage(
