@@ -64,66 +64,59 @@ class mortgage:
     name: str = ''
     pmi_amount: float = 0.0
     pmi_ltv: float = 80.0
-    
-    def __post_init__(self):
-        if (self.loan_amount is not None) and (self.loan_amount < 1):
-            raise ValueError('`loan_amount` must be greater than or equal to 1')
-        elif (self.loan_amount is None) and ((self.sale_price is None) or (self.sale_price < 1)):
-            raise ValueError('`sale_price` must be defined and >= 1 if `loan_amount` is not defined')
-        
-        if (self.dp_dollars is None) and (self.dp_percent is None):
-            self.dp_dollars = 0
-            self.dp_percent = 0.0
-        elif (self.dp_dollars is None) and (self.sale_price is not None) and (self.dp_percent is not None):
-            self.dp_dollars = self.sale_price*(self.dp_percent/100)
-        elif (self.dp_dollars is None) and (self.loan_amount is not None) and (self.dp_percent is not None):
-            self.sale_price = self.loan_amount/(1 - (self.dp_percent/100))
-            self.dp_dollars = self.sale_price*(self.dp_percent/100)
-            
-        if (self.loan_amount is None):
-            self.loan_amount = self.sale_price - self.dp_dollars
-        elif (self.sale_price is not None) and (self.loan_amount != (self.sale_price - self.dp_dollars)):
-            raise ValueError('`loan_amount` and `sale_price` minus down payment do not match')
 
-        if self.insurance is None:
-            self.insurance = 0.0
-        if self.taxes is None:
-            self.taxes = 0.0
-        if self.add_payment is None:
-            self.add_payment = 0.0
-        if self.closing_costs is None:
-            self.closing_costs = 0.0
-        if self.name is None:
-            self.name = ''
-        if self.pmi_amount is None:
-            self.pmi_amount = 0.0
-        if self.pmi_ltv is None:
-            self.pmi_ltv = 80.0
+    def __post_init__(self):
+        if (((self.loan_amount is None) or (self.loan_amount < 1))
+             and ((self.sale_price is None) or (self.sale_price < 1))):
+            raise ValueError('Sale price or loan amount must be defined and >= $1.')
+        elif (self.pmi_amount > 0) and ((self.sale_price is None) or (self.sale_price < 1)):
+            raise ValueError('If there is PMI, the sale price must be defined to calculate LTV.')
+        # if loan amount is defined, use it
+        elif (self.loan_amount is not None) and (self.loan_amount >= 1):
+            if (self.dp_dollars is None) and (self.dp_percent is None):
+                self.dp_dollars = 0
+                self.dp_percent = 0.0
+            elif self.dp_dollars is not None:
+                self.dp_percent = (self.dp_dollars/(self.loan_amount + self.dp_dollars))*100
+            else:
+                self.dp_dollars = ((self.dp_percent/100)*self.loan_amount)/(1 - (self.dp_percent/100))
+            self.sale_price = self.loan_amount + self.dp_dollars
+        # otherwise, use sale price
+        else:
+            if (self.dp_dollars is None) and (self.dp_percent is None):
+                self.dp_dollars = 0
+                self.dp_percent = 0.0
+            elif self.dp_dollars is not None:
+                self.dp_percent = (self.dp_dollars/self.sale_price)*100
+            else:
+                self.dp_dollars = self.sale_price*(self.dp_percent/100)
+            self.loan_amount = self.sale_price - self.dp_dollars
+
+        if self.insurance is None: self.insurance = 0.0
+        if self.taxes is None: self.taxes = 0.0
+        if self.add_payment is None: self.add_payment = 0.0
+        if self.closing_costs is None: self.closing_costs = 0.0
+        if self.name is None: self.name = ''
+        if self.pmi_amount is None: self.pmi_amount = 0.0
+        if self.pmi_ltv is None: self.pmi_ltv = 80.0
         
         self.c_rate = self.rate/(100*12)
         self.payoff = self.payoff_months if self.payoff_months is not None else self.term
-#         self.base_payment = ( (self.loan_amount*(self.c_rate*(1 + self.c_rate)**self.term))
-#                               / (((1 + self.c_rate)**self.term) - 1) )
         self.base_payment = monthly_payment(self.loan_amount, self.c_rate, self.term)
         self.piti_payment = self.base_payment + self.insurance/12 + self.taxes/12
         self.payment = self.base_payment + self.add_payment
-        
         self.am_table_base = build_am_table(self.term, self.loan_amount, self.c_rate, self.base_payment)
         self.am_table = build_am_table(self.term, self.loan_amount, self.c_rate, self.payment)
-        
         self.interest_paid_base = self.am_table_base.loc[self.am_table_base['month'] <= self.payoff,
                                                          'interest'].sum()
         self.interest_paid = self.am_table.loc[self.am_table['month'] <= self.payoff,
                                                'interest'].sum()
         self.interest_saved = self.interest_paid_base - self.interest_paid
         
-        if self.pmi_amount <= 0:
-            self.pmi_drop = 0
-        elif self.sale_price is None:
-            raise ValueError('if there is PMI, `sale_price` must be defined to calculate LTV')
+        if self.pmi_amount <= 0: self.pmi_drop = 0
         else:
             am_with_ltv = self.am_table.copy()
-            am_with_ltv['ltv'] = am_with_ltv['balance']/self.sale_price
+            am_with_ltv['ltv'] = am_with_ltv.loc[:, 'balance']/self.sale_price
             self.pmi_drop = am_with_ltv.loc[am_with_ltv['ltv'] < (self.pmi_ltv/100), 'month'].min()
         self.pmi_total_cost = self.pmi_amount*self.pmi_drop
         self.finance_costs = self.interest_paid + self.closing_costs + self.pmi_total_cost
@@ -135,7 +128,6 @@ class mortgage:
             self.balance_at_payoff = self.am_table.loc[self.am_table['month'] == self.payoff, 'balance'].values[0]
             self.payoff_reason = 'Sale'
         self.payoff_month = min(self.months_payoff_by_payment, self.payoff)
-
         self.cash_to_close = self.dp_dollars + self.closing_costs
         
     def summary(self):
@@ -329,16 +321,13 @@ pmi_ltv = st.sidebar.number_input(
     step=0.01
 )
 
-if sale_price < 1.0:
-    sale_price = None
+if sale_price < 1.0: sale_price = None
 if dp_select == 'dollars':
     dp_percent = None
 elif dp_select == 'percent':
     dp_dollars = None
-if loan_amount < 1.0:
-    loan_amount = None
-if payoff_months < 1:
-    payoff_months = None
+if loan_amount < 1.0: loan_amount = None
+if payoff_months < 1: payoff_months = None
 
 mort = mortgage(
     term=term,
