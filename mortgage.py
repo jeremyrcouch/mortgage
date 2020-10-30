@@ -261,7 +261,7 @@ dp_select = st.sidebar.radio(
     'Down Payment Option',
     ['Dollars', 'Percent']
 )
-if dp_select == 'dollars':
+if dp_select == 'Dollars':
     dp_dollars = st.sidebar.number_input(
         'Down Payment [$]',
         min_value=0.0,
@@ -269,7 +269,7 @@ if dp_select == 'dollars':
         value=60000.0,
         step=0.01
     )
-elif dp_select == 'percent':
+elif dp_select == 'Percent':
     dp_percent = st.sidebar.number_input(
         'Down Payment [%]',
         min_value=0.0,
