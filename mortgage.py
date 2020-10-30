@@ -4,24 +4,6 @@ import pandas as pd
 import streamlit as st
 
 
-INPUT_HEADERS = [
-    'name',
-    'sale_price',
-    'dp_dollars',
-    'dp_percent',
-    'loan_amount',
-    'term',
-    'rate',
-    'insurance',
-    'taxes',
-    'add_payment',
-    'payoff_months',
-    'closing_costs',
-    'pmi_amount',
-    'pmi_ltv'
-]
-
-
 def monthly_payment(amount: float, rate: float, term: int) -> float:
     return (amount*(rate*(1 + rate)**term)) / (((1 + rate)**term) - 1)
 
@@ -207,8 +189,9 @@ def compare_mortgages(inputs: pd.DataFrame) -> pd.DataFrame:
 
 
 st.title('Mortgage Summary')
-st.subheader('Fill out mortgage info in the sidebar to the left.')
+st.write('Fill out mortgage info in the sidebar to the left.')
 
+st.sidebar.subheader('Mortgage Info')
 name = st.sidebar.text_input(
     'Name',
     value='Option 1'
@@ -348,10 +331,26 @@ st.text(mort)
 
 st.title('Mortgage Comparison')
 inputs_raw = st.file_uploader('Upload a file:', type=['csv'])
-st.write('Column headers for uploaded files:')
-st.write('{}'.format(INPUT_HEADERS))
-
 if inputs_raw is not None:
     inputs = pd.read_csv(inputs_raw)
     table = compare_mortgages(inputs)
     st.dataframe(table, width=600, height=900)
+
+st.write('Uploaded file should have these headers with the noted requirements:')
+upload_explain = pd.DataFrame({
+    'name': ['', '30 year']
+    'sale_price': ['$', 300000]
+    'dp_dollars': ['$', 60000]
+    'dp_percent': ['%', 20]
+    'loan_amount': ['$', 240000]
+    'term': ['months', 360]
+    'rate': ['%', 2.75]
+    'insurance': ['$ - annual', 1000]
+    'taxes': ['$ - annual', 4000]
+    'add_payment': ['$ - monthly', 100]
+    'payoff_months': ['months', 120]
+    'closing_costs': ['$', 2200]
+    'pmi_amount': ['$ - monthly', 75]
+    'pmi_ltv': ['%', 80]
+}, index=['units', 'example'])
+st.dataframe(upload_explain, width=900)
