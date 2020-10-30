@@ -69,7 +69,8 @@ class mortgage:
         if (((self.loan_amount is None) or (self.loan_amount < 1))
              and ((self.sale_price is None) or (self.sale_price < 1))):
             raise ValueError('Sale price or loan amount must be defined and >= $1.')
-        elif (self.pmi_amount > 0) and ((self.sale_price is None) or (self.sale_price < 1)):
+        elif ((self.pmi_amount is not None) and (self.pmi_amount > 0)
+              and ((self.sale_price is None) or (self.sale_price < 1))):
             raise ValueError('If there is PMI, the sale price must be defined to calculate LTV.')
         # if loan amount is defined, use it
         elif (self.loan_amount is not None) and (self.loan_amount >= 1):
