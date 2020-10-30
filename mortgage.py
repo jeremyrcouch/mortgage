@@ -186,27 +186,15 @@ class mortgage:
         ax2.set_ylabel('$\nInterest\nPrincipal')
         _ = fig.legend()
         return fig
-        
+
+
 def compare_mortgages(inputs: pd.DataFrame) -> pd.DataFrame:
     """"""
     inputs = inputs.where(pd.notnull(inputs), None)
     table = None
     for i in range(len(inputs)):
-        row = inputs.iloc[i, :]
-        temp = mortgage(
-            term=row['term'],
-            rate=row['rate'],
-            sale_price=row['sale_price'],
-            dp_dollars=row['dp_dollars'],
-            dp_percent=row['dp_percent'],
-            loan_amount=row['loan_amount'],
-            insurance=row['insurance'],
-            taxes=row['taxes'],
-            payoff_months=row['payoff_months'],
-            add_payment=row['add_payment'],
-            closing_costs=row['closing_costs'],
-            name=row['name']
-        )
+        row = inputs.iloc[i, :].to_dict()
+        temp = mortgage(**row)
 
         if table is None:
             table = temp.summary()
@@ -218,6 +206,7 @@ def compare_mortgages(inputs: pd.DataFrame) -> pd.DataFrame:
 
 
 st.title('Mortgage Summary')
+st.subheader('Fill out mortgage info in the sidebar to the left.')
 
 name = st.sidebar.text_input(
     'Name',
