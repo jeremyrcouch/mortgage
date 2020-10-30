@@ -338,19 +338,19 @@ if inputs_raw is not None:
 
 st.write('Uploaded file should have these headers with the noted requirements:')
 upload_explain = pd.DataFrame({
-    'name': ['', '30 year']
-    'sale_price': ['$', 300000]
-    'dp_dollars': ['$', 60000]
-    'dp_percent': ['%', 20]
-    'loan_amount': ['$', 240000]
-    'term': ['months', 360]
-    'rate': ['%', 2.75]
-    'insurance': ['$ - annual', 1000]
-    'taxes': ['$ - annual', 4000]
-    'add_payment': ['$ - monthly', 100]
-    'payoff_months': ['months', 120]
-    'closing_costs': ['$', 2200]
-    'pmi_amount': ['$ - monthly', 75]
+    'name': ['', '30 year'],
+    'sale_price': ['$', 300000],
+    'dp_dollars': ['$', 60000],
+    'dp_percent': ['%', 20],
+    'loan_amount': ['$', 240000],
+    'term': ['months', 360],
+    'rate': ['%', 2.75],
+    'insurance': ['$ - annual', 1000],
+    'taxes': ['$ - annual', 4000],
+    'add_payment': ['$ - monthly', 100],
+    'payoff_months': ['months', 120],
+    'closing_costs': ['$', 2200],
+    'pmi_amount': ['$ - monthly', 75],
     'pmi_ltv': ['%', 80]
 }, index=['units', 'example'])
 st.dataframe(upload_explain, width=900)
